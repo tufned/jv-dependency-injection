@@ -1,6 +1,7 @@
 package mate.academy.lib;
 
 import java.lang.reflect.Field;
+import java.util.HashMap;
 import java.util.Map;
 import mate.academy.service.FileReaderService;
 import mate.academy.service.ProductParser;
@@ -16,6 +17,7 @@ public class Injector {
             ProductService.class, ProductServiceImpl.class,
             ProductParser.class, ProductParserImpl.class
     );
+    private final Map<Class<?>, Object> instances = new HashMap<>();
 
     public static Injector getInjector() {
         return injector;
@@ -45,7 +47,12 @@ public class Injector {
 
     private Object createInstance(Class<?> clazz) {
         try {
-            return clazz.getConstructor().newInstance();
+            if (instances.containsKey(clazz)) {
+                return instances.get(clazz);
+            }
+            Object instance = clazz.getConstructor().newInstance();
+            instances.put(clazz, instance);
+            return instance;
         } catch (ReflectiveOperationException e) {
             throw new RuntimeException("Can't create a new instance of " + clazz.getName(), e);
         }
